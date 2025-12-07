@@ -15,7 +15,7 @@ tau2_r = tau2 / TC
 K_process = 1.0
 
 # PID Parameters (Aggressive Tuning)
-Kp = 1.33
+Kp = 2.2
 Ti = 1097.29
 Td = 203.54
 Ki = Kp / Ti # Integral Gain
@@ -23,7 +23,7 @@ Kd = Kp * Td # Derivative Gain
 
 # Valve Limits (Saturation)
 MV_MIN = 0.0
-MV_MAX = 1.2
+MV_MAX = 1.25
 
 # Simulation Time
 time_sim = 8000.0
@@ -39,7 +39,7 @@ b = tau1_r + tau2_r
 A_c = np.array([[0, 1], [-1/a, -b/a]]) # 2x2
 B_c = np.array([[0], [K_process / a]]) # 2x1
 C_c = np.array([[1, 0]]) # 1x2
-D_c = np.array([[0.0]]) # 1x1 
+D_c = np.array([[0.0]]) # 1x1 FIX: Explicit 2D array definition
 
 # Convert Continuous State-Space (SS) to Discrete SS
 G_d = signal.cont2discrete((A_c, B_c, C_c, D_c), dt=Ts_r)
@@ -74,7 +74,6 @@ for k in range(num_steps):
     
     # 2. Derivative Term (Derivative on PV for smoother control)
     if k > 0:
-        # Note: D-term uses the *true* Sample Time (Ts), not the rescaled one
         D_term = - Kd * (PV[k] - PV_prev) / Ts 
     else:
         D_term = 0.0
@@ -87,7 +86,6 @@ for k in range(num_steps):
     MV[k] = mv_out
     
     # 4. Anti-Windup: Conditional Integration
-    # Only update integral term if the valve is NOT saturated 
     if raw_mv == mv_out:
         integral_term += Ki * Error * Ts
     
@@ -103,8 +101,11 @@ FIGSIZE = (14, 8)
 PV_LW = 2.0
 CV_LW = 1.5
 
+# Title string including the PID parameters
+tuning_title = f'PID Tuning: Kp={Kp:.2f}, Ti={Ti:.2f}, Td={Td:.2f} (with Saturation/Anti-Windup)'
+
 fig, axes = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True)
-time_out_s = time_vec # Time is already in seconds
+time_out_s = time_vec 
 
 # 🌡️ Plot Process Variable (PV)
 ax1 = axes[0]
@@ -112,7 +113,7 @@ ax1.plot(time_out_s, PV, 'b-', linewidth=PV_LW, label='Process Variable (PV)')
 ax1.axhline(y=1.0, color='g', linestyle='--', linewidth=1.0, label='Setpoint (SP)')
 ax1.set_ylabel('Process Output Value', color='b')
 ax1.grid(True)
-ax1.set_title(r'PV Response: Discrete Two-Tau Model with PID and Anti-Windup')
+ax1.set_title(r'PV Response: Discrete Two-Tau Model' + '\n' + tuning_title)
 ax1.legend(loc='lower right')
 
 # 📈 Plot Control Variable (CV)
@@ -123,7 +124,7 @@ ax2.axhline(y=MV_MIN, color='orange', linestyle=':', linewidth=0.5, label=f'MV M
 ax2.set_ylabel(f'Control Signal Value (MV) [{MV_MIN}-{MV_MAX}]', color='r')
 ax2.set_xlabel('Time (seconds)')
 ax2.grid(True)
-ax2.set_title(f'MV Response: Saturation and Anti-Windup in Discrete PID')
+ax2.set_title(tuning_title)
 ax2.legend(loc='lower right')
 
 plt.tight_layout()
