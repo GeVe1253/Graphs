@@ -102,7 +102,7 @@ PV_LW = 2.0
 CV_LW = 1.5
 
 # Title string including the PID parameters
-tuning_title = f'PID Tuning: Kp={Kp:.2f}, Ti={Ti:.2f}, Td={Td:.2f} (with Saturation/Anti-Windup)'
+tuning_title = f'PID Tuning: Kp={Kp:.3f}, Ti={Ti:.3f}, Td={Td:.3f} (with Saturation/Anti-Windup)'
 
 fig, axes = plt.subplots(2, 1, figsize=FIGSIZE, sharex=True)
 time_out_s = time_vec 
