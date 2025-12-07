@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 # Load the merged CSV with three temperature columns
-path = "/mnt/data/Rise1Merged - Sheet1.csv"
+path = "Rise1MergedSheet1.csv"
 df = pd.read_csv(path)
 
 print("Columns detected:", list(df.columns))
