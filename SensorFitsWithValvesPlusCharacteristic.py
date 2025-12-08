@@ -193,9 +193,9 @@ y_avg_3tau = three_tau_fixed_valve(tdata, avg_K, avg_tau1, avg_tau2, avg_T0)
 
 # FIX: Construct the legend label exactly as requested, using sorted taus
 legend_label = (
-    f"Weighted avg ($\\tau_1$={t_small:.1f}s, "
-    f"$\\tau_2$={t_medium:.1f}s, "
-    f"$\\tau_3$={t_large:.1f}s)"
+    f"Weighted avg ($\\tau_v$={t_small:.1f}s, "
+    f"$\\tau_1$={t_medium:.1f}s, "
+    f"$\\tau_2$={t_large:.1f}s)"
 )
 # Note: Changing 'k-' (solid black) to 'k--' (dashed black) for consistency with the reference image.
 plt.plot(tdata/60.0, y_avg_3tau, "k--", linewidth=2, label=legend_label)
