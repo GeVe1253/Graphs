@@ -129,7 +129,7 @@ tau_final = sorted([tau1_avg, tau2_avg, tau_valve_avg]) # Sort for reporting con
 y_avg = three_tau_fixed_valve(tdata, K_avg, tau1_avg, tau2_avg, T0_avg)
 
 plt.plot(tdata/60.0, y_avg, 'k--', linewidth=2, 
-         label=f"Weighted avg (τ1={tau_final[0]:.1f}s, τ2={tau_final[1]:.1f}s, τ3={tau_final[2]:.1f}s)")
+         label=f"Weighted avg (τv={tau_final[0]:.1f}s, τ1={tau_final[1]:.1f}s, τ2={tau_final[2]:.1f}s)")
 
 plt.xlabel("Time since valve open (min)")
 plt.ylabel("Temperature (°C)")
