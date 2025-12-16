@@ -94,8 +94,8 @@ def generate_four_panel_nyquist():
         (f"Mismatch B (-{TOL*100:.0f}% t1, +{TOL*100:.0f}% t2)", 1.0-TOL, 1.0+TOL)
     ]
 
-    # Adjusted to 20x14 for a sleek landscape orientation
-    fig, axes = plt.subplots(2, 2, figsize=(20, 14))
+    # Adjusted to 20xNum for a sleek landscape orientation
+    fig, axes = plt.subplots(2, 2, figsize=(20, 16))
     axes = axes.flatten()
 
     for i, (title, m1, m2) in enumerate(scenarios):
