@@ -95,7 +95,7 @@ def generate_four_panel_nyquist():
     ]
 
     # Adjusted to 20xNum for a sleek landscape orientation
-    fig, axes = plt.subplots(2, 2, figsize=(20, 16))
+    fig, axes = plt.subplots(2, 2, figsize=(20, 15))
     axes = axes.flatten()
 
     for i, (title, m1, m2) in enumerate(scenarios):
@@ -118,7 +118,7 @@ def generate_four_panel_nyquist():
     fig.legend(handles=custom_legend, loc='lower center', ncol=5, fontsize=12, frameon=False)
     
     # top=0.88 reduces the gap between suptitle and the first row of axes
-    plt.subplots_adjust(top=0.88, bottom=0.10, hspace=0.2, wspace=0.1)
+    plt.subplots_adjust(top=0.88, bottom=0.05, hspace=0.0, wspace=0.1)
     plt.show()
 
 generate_four_panel_nyquist()
