@@ -19,9 +19,7 @@ baseline_temp = 80.0
 sp1, sp2 = 90.0, 70.0
 
 # --- Controller Definitions (Restoring Code 1's Comparative Logic) ---
-#PID_FAST = {'Kp': 4.6, 'Ti': 506, 'Td': 126}
-#PID_SLOW = {'Kp': 2.4, 'Ti': 2019, 'Td': 504}
-PID_FAST = {'Kp': 2.2, 'Ti': 1168.85, 'Td': 157.37}
+PID_FAST = {'Kp': 2.2, 'Ti': 1168.85, 'Td': 239}
 PID_SLOW = {'Kp': 2.2, 'Ti': 1478.03, 'Td': 0.00}
 
 # ==========================================
@@ -199,10 +197,11 @@ t_hist, v_hist, p_alpha, p_title = capture_data
 time_ax = np.linspace(0, t_end, len(t_hist))
 
 # --- Parameter String for Title ---
-# REMOVED fast/slow nomenclature
+# FIX: Added Td for both PID controllers to param_str
 param_str = (
     f"Process: SOPDT $\\tau_1={tau11:.0f},\\tau_2={tau12:.0f}$ | Coupling: $\\tau_{{slow}}={TAU_CROSS_SLOW:.0f},\\tau_{{fast}}={TAU_CROSS_FAST:.0f}$"
-    f"\nPID 1: $K_p={PID_FAST['Kp']:.1f}, \\tau_I={PID_FAST['Ti']:.0f}$ | PID 2: $K_p={PID_SLOW['Kp']:.1f}, \\tau_I={PID_SLOW['Ti']:.0f}$"
+    f"\nPID 1: $K_p={PID_FAST['Kp']:.1f}, \\tau_I={PID_FAST['Ti']:.0f}, \\tau_D={PID_FAST['Td']:.0f}$ | "
+    f"PID 2: $K_p={PID_SLOW['Kp']:.1f}, \\tau_I={PID_SLOW['Ti']:.0f}, \\tau_D={PID_SLOW['Td']:.0f}$"
 )
 
 # Figure Size maintained
@@ -212,25 +211,25 @@ gs = fig.add_gridspec(3, 1, height_ratios=[1, 1, 2])
 # --- Row 1: Table for Configuration A ---
 ax_tbl_A = fig.add_subplot(gs[0])
 ax_tbl_A.axis('off'); ax_tbl_A.axis('tight')
-# REMOVED fast/slow nomenclature from column labels
+# Column headers maintained
 cols = ("Alpha", "RGA", "PID 1 Status", "P1 MV Var", "P1 Temp Var", 
         "PID 2 Status", "P2 MV Var", "P2 Temp Var")
 tbl_A = ax_tbl_A.table(cellText=results_data_A, colLabels=cols, loc='center', cellLoc='center')
 tbl_A.auto_set_font_size(False); tbl_A.set_fontsize(8)
 tbl_A.scale(1, 1.4)
-# REMOVED fast/slow nomenclature from title
+# Title maintained
 ax_tbl_A.set_title(f"Stability Sweep: Configuration A - Standard Assignment", fontweight='bold')
 
 # --- Row 2: Table for Configuration B ---
 ax_tbl_B = fig.add_subplot(gs[1])
 ax_tbl_B.axis('off'); ax_tbl_B.axis('tight')
-# REMOVED fast/slow nomenclature from column labels
+# Column headers maintained
 cols_B = ("Alpha", "RGA", "PID 1 Status", "P1 MV Var", "P1 Temp Var", 
           "PID 2 Status", "P2 MV Var", "P2 Temp Var")
 tbl_B = ax_tbl_B.table(cellText=results_data_B, colLabels=cols_B, loc='center', cellLoc='center')
 tbl_B.auto_set_font_size(False); tbl_B.set_fontsize(8)
 tbl_B.scale(1, 1.4)
-# UPDATED TITLE as requested
+# Title maintained
 ax_tbl_B.set_title(f"Stability Sweep: Configuration B - Controller Swap", fontweight='bold')
 
 # --- Row 3: The Failure Plot (Includes requested text) ---
@@ -240,7 +239,7 @@ ax_plt.plot(time_ax, t_hist[:, 1], 'b-', linewidth=1.5, label='Temp 2 (PV)')
 ax_plt.plot(time_ax, v_hist[:, 0], 'r--', alpha=0.6, label='Valve 1 (MV)')
 ax_plt.plot(time_ax, v_hist[:, 1], 'b--', alpha=0.6, label='Valve 2 (MV)')
 
-# Title spacing adjusted in the previous step (pad=40, y=1.03)
+# Title spacing maintained
 ax_plt.set_title(f"Dynamic Analysis at Stability Limit (Alpha = {p_alpha:.2f})", pad=40, fontweight='bold')
 ax_plt.text(0.5, 1.03, param_str, transform=ax_plt.transAxes, ha='center', fontsize=9, color='gray') 
 
