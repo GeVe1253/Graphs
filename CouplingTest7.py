@@ -112,9 +112,10 @@ def check_stability_detailed(h_temp, h_valve, tail=1000):
     
     results = [] 
     # CONFIRMED: MV required to hold 80.0 deg C steady-state
-    MV_EXPECTED_MIDLINE = 80.0 
+    MV_EXPECTED_MIDLINE = 80.0
+    EPS = 1e-2
     # CONFIRMED: Highest Possible
-    LC_STRAIN_THRESHOLD = 100 - (MV_EXPECTED_MIDLINE + 0.001) 
+    LC_STRAIN_THRESHOLD = (100 - MV_EXPECTED_MIDLINE) - EPS 
     
     for i in range(2): # Zone 0 (i=0) and Zone 1 (i=1)
         pv_hist = h_temp[-tail:, i]
@@ -138,7 +139,7 @@ def check_stability_detailed(h_temp, h_valve, tail=1000):
         elif temp_var > 0.1:
             status = "OSCILLATING"
             
-        # 4. STRAINED (Stable but Mean MV is outside [60.1%, 99.9%])
+        # 4. STRAINED (Stable but Mean MV is outside the range)
         elif abs(avg_mv - MV_EXPECTED_MIDLINE) > LC_STRAIN_THRESHOLD:
             status = "STRAINED"
 
@@ -253,4 +254,5 @@ ax_plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+
 
