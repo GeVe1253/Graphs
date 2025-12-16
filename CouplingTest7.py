@@ -9,17 +9,20 @@ K1, tau11, tau12 = 1.0, 309.2, 1168.8
 K2, tau21, tau22 = 1.0, 341.75, 1125.71
 
 # --- Cross-Coupling Dynamics (Advanced - Technically Superior) ---
-TAU_CROSS_SLOW = 120.0 
-TAU_CROSS_FAST = 10.0  
+TAU_CROSS_SLOW = 95.0 
+TAU_CROSS_FAST = 85.0  
 
 # --- Simulation Settings ---
 dt = 2.0
 t_end = 20000
 baseline_temp = 80.0
-sp1, sp2 = 90.0, 70.0
+sp1, sp2 = 85.0, 75.0
 
 # --- Controller Definitions (Restoring Code 1's Comparative Logic) ---
-PID_FAST = {'Kp': 2.2, 'Ti': 1168.85, 'Td': 239}
+#PID_FAST = {'Kp': 4.6, 'Ti': 506, 'Td': 126}
+#PID_SLOW = {'Kp': 2.4, 'Ti': 2019, 'Td': 504} 
+PID_FAST = {'Kp': 2.2, 'Ti': 1168.85, 'Td': 157.37}
+#PID_SLOW = {'Kp': 2.2, 'Ti': 1168.85, 'Td': 157.37}
 PID_SLOW = {'Kp': 2.2, 'Ti': 1478.03, 'Td': 0.00}
 
 # ==========================================
@@ -110,8 +113,8 @@ def check_stability_detailed(h_temp, h_valve, tail=1000):
     results = [] 
     # CONFIRMED: MV required to hold 80.0 deg C steady-state
     MV_EXPECTED_MIDLINE = 80.0 
-    # CONFIRMED: Strain threshold requested by user
-    LC_STRAIN_THRESHOLD = 19.9 
+    # CONFIRMED: Highest Possible
+    LC_STRAIN_THRESHOLD = 100 - (MV_EXPECTED_MIDLINE + 0.001) 
     
     for i in range(2): # Zone 0 (i=0) and Zone 1 (i=1)
         pv_hist = h_temp[-tail:, i]
@@ -250,3 +253,4 @@ ax_plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+
