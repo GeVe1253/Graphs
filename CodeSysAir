@@ -1,0 +1,110 @@
+FUNCTION_BLOCK FB_OvenZone
+VAR_INPUT
+    Enable          : BOOL := TRUE;
+    Setpoint        : REAL := 85.0;
+
+    // --- HYDRAULIC COUPLING (Shared Pipe) ---
+    // For Zone 2, wire Zone 1's Valve_Pos here.
+    Coupling_In     : REAL := 0.0; 
+    Coupling_Ratio  : REAL := 0.31; 
+
+    // --- AIR COUPLING (Shared Insulation) ---
+    // Wire the *other* zone's Oven_Temp here.
+    Neighbor_Temp   : REAL := 20.0; 
+    Air_Coupling_Ratio : REAL := 0.11;
+END_VAR
+VAR_OUTPUT
+    Valve_Pos       : REAL;
+    Slave_SP        : REAL;
+    Oven_Temp       : REAL;
+END_VAR
+VAR
+    // Controllers
+    MasterPID       : PID;
+    SlavePID        : PID;
+    
+    // Physics State
+    Raw_Air_Temp    : REAL;
+    Dtime           : REAL := 2.0; // Task
+    SimSpeed        : REAL := 10.0;
+    
+    // Helpers
+    Effective_Valve : REAL;
+    Max_Change      : REAL;
+    T2_Seconds      : REAL;
+    Actual_K_Gain   : REAL := 0.8125;
+    Tau_2           : TIME := T#1169s;
+    
+    // Air Coupling Vars
+    Current_Temp    : REAL;
+    Air_Transfer    : REAL;
+END_VAR
+
+
+
+
+///IMPLEMENTATION
+// ---------------------------------------------------------
+// 1. PID PARAMETER ASSIGNMENT
+// ---------------------------------------------------------
+
+// Master: Controls Temp
+MasterPID.KP    := 5.6;
+MasterPID.TN    := 1200.0 / SimSpeed; 
+MasterPID.TV    := 120.0 / SimSpeed;  
+MasterPID.Y_MIN := 0.0;
+MasterPID.Y_MAX := 100.0;
+
+// Slave: Controls Valve (Increased KP to 2.5 to fix slow response)
+SlavePID.KP     := 1.6; 
+SlavePID.TN     := 600.0 / SimSpeed;
+SlavePID.TV     := 0.0;
+SlavePID.Y_MIN  := 0.0;
+SlavePID.Y_MAX  := 100.0;
+
+
+// ---------------------------------------------------------
+// 2. CONTROL LOOP
+// ---------------------------------------------------------
+
+MasterPID(ACTUAL := Oven_Temp, SET_POINT := Setpoint);
+Slave_SP := MasterPID.Y;
+
+SlavePID(ACTUAL := Valve_Pos, SET_POINT := Slave_SP);
+
+
+// ---------------------------------------------------------
+// 3. PHYSICS ENGINE (Dual Coupling)
+// ---------------------------------------------------------
+
+// A. Actuator Movement (Ramp)
+Max_Change := 1.36 * SimSpeed * Dtime;
+
+IF (SlavePID.Y > Valve_Pos) THEN
+    Valve_Pos := MIN(Valve_Pos + Max_Change, SlavePID.Y);
+ELSIF (SlavePID.Y < Valve_Pos) THEN
+    Valve_Pos := MAX(Valve_Pos - Max_Change, SlavePID.Y);
+END_IF;
+
+Valve_Pos := LIMIT(0.0, Valve_Pos, 100.0);
+
+// B. Hydraulic Starvation (Oil Side)
+// Zone 2 loses power if Zone 1 is open
+Effective_Valve := Valve_Pos - (Coupling_In * Coupling_Ratio);
+Effective_Valve := MAX(0.0, Effective_Valve);
+
+// C. Air Coupling (Thermal Side)
+// Heat moves from Hot Neighbor -> Cold Self (or vice versa)
+Current_Temp := Raw_Air_Temp + 20.0;
+Air_Transfer := (Neighbor_Temp - Current_Temp) * Air_Coupling_Ratio;
+
+// D. Thermal Lag Application
+// The 'Target' is now (Valve Heat) + (Neighbor Heat)
+T2_Seconds := TO_REAL(TIME_TO_DINT(Tau_2)) / 1000.0;
+
+IF (T2_Seconds + (Dtime * SimSpeed)) > 0 THEN
+    Raw_Air_Temp := Raw_Air_Temp + 
+        ( ((Effective_Valve * Actual_K_Gain) + Air_Transfer - Raw_Air_Temp) * ((Dtime * SimSpeed) / (T2_Seconds + (Dtime * SimSpeed))) );
+END_IF;
+
+Oven_Temp := Raw_Air_Temp + 20.0;;
